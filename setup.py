@@ -4,7 +4,7 @@ from distutils.core import setup
 
 setup(
     name="testnado",
-    version="0.1",
+    version="0.1.1",
     description="Tornado test helpers and Selenium testing with Tornado",
     author='Josh Marshall',
     author_email='catchjosh@gmail.com',
