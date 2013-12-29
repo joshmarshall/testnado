@@ -1,6 +1,9 @@
-Testnado - Test helpers for Tornado
-===================================
+Testnado
+========
+Test helpers for Tornado
+------------------------
 This is a collection of several testing helpers I've compiled for Tornado, including authenticated fetch()ing and running Selenium sessions locally against Tornado applications.
+[![Build Status](https://travis-ci.org/joshmarshall/testnado.png?branch=master)](https://travis-ci.org/joshmarshall/testnado)
 
 Installation:
 -------------
