@@ -1,30 +1,43 @@
 # These tests are fairly obscure. Any help making them more clear
 # would be appreciated.
 
-import mock
 from tests.helpers import TestCaseTestCase
-from tornado.testing import AsyncHTTPTestCase as AHTC
 from testnado import FetchCase, AuthenticatedFetchCase
+from tornado.testing import AsyncHTTPTestCase
+import tornado.web
+
+
+class Handler(tornado.web.RequestHandler):
+
+    def get(self):
+        if self.request.headers.get("foobar") == "authed":
+            return self.redirect("/authed")
+        return self.redirect("/public")
+
+
+class BasicAppTestCase(AsyncHTTPTestCase):
+
+    def get_app(self):
+        return tornado.web.Application([("/foo", Handler)])
 
 
 class TestFetchCases(TestCaseTestCase):
 
-    @mock.patch("tornado.testing.AsyncHTTPTestCase.fetch")
-    def test_handler_test_case_fetch_no_redirect(self, mock_fetch):
-        @self.build_case(FetchCase, AHTC)
+    def test_handler_test_case_fetch_no_redirect(self):
+        @self.build_case(FetchCase, BasicAppTestCase)
         def test_fetch_no_redirect(self):
-            self.fetch("/foo")
-
-        mock_fetch.assert_called_with("/foo", follow_redirects=False)
+            response = self.fetch("/foo")
+            self.assertEqual(302, response.code)
+            self.assertEqual("/public", response.headers["Location"])
+            self.assertIsNotNone(response)
 
     def test_authenticated_fetch_get_credentials_raises(self):
         with self.assertRaises(NotImplementedError):
-            @self.build_case(AuthenticatedFetchCase, AHTC)
+            @self.build_case(AuthenticatedFetchCase, BasicAppTestCase)
             def test_authenticated_fetch(self):
-                self.authenticated_fetch("/secret")
+                self.authenticated_fetch("/foo")
 
-    @mock.patch("tornado.testing.AsyncHTTPTestCase.fetch")
-    def test_authenticated_fetch_get_credentials(self, mock_fetch):
+    def test_authenticated_fetch_get_credentials(self):
 
         class DummyCredentials(object):
 
@@ -33,10 +46,10 @@ class TestFetchCases(TestCaseTestCase):
                     fetch_arguments.headers["foobar"] = "authed"
                 return update_credentials
 
-        @self.build_case(DummyCredentials, AuthenticatedFetchCase, AHTC)
+        @self.build_case(
+            DummyCredentials, AuthenticatedFetchCase,
+            BasicAppTestCase)
         def test_method(self):
-            self.authenticated_fetch("/secret")
-
-        mock_fetch.assert_called_with(
-            url="/secret", headers={"foobar": "authed"},
-            follow_redirects=False)
+            response = self.authenticated_fetch("/foo")
+            self.assertEqual(302, response.code)
+            self.assertEqual("/authed", response.headers["Location"])

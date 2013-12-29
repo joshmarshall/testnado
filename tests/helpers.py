@@ -1,7 +1,6 @@
 # Yes, these are test helpers for a test helper library that is being
 # tested. It contains a class called TestCaseTestCase. Meta enough yet?
 
-from tornado.web import Application
 import unittest
 
 
@@ -24,14 +23,11 @@ class TestCaseTestCase(unittest.TestCase):
             self.fail("Missing bases for 'build_case'")
 
         def wrapper(test_method):
-            def get_app(self):
-                return Application()
 
             def test_the_method(case_instance):
                 test_method(case_instance)
 
             methods = {
-                "get_app": get_app,
                 "test_the_method": test_the_method
             }
 

@@ -17,7 +17,7 @@ def wrap_browser_session(*drivers):
         @wraps(test_method)
         def test_runner(test_case, *args, **kwargs):
             port = test_case.get_http_port()
-            ioloop = test_case.get_new_ioloop()
+            ioloop = test_case.io_loop
             app = test_case.get_app()
             http_server = HTTPServer(app, io_loop=ioloop)
             http_server.listen(port)

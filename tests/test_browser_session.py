@@ -61,14 +61,13 @@ class TestBrowserSession(unittest.TestCase):
 
         class DummyTest(object):
 
+            io_loop = ioloop
+
             def get_app(test_case):
                 return Application([("/", IndexHandler)])
 
             def get_http_port(test_case):
                 return 18020
-
-            def get_new_ioloop(test_case):
-                return ioloop
 
             @wrap_browser_session()
             def wrapped(test_case, driver):

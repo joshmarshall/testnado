@@ -10,7 +10,7 @@ class AuthenticatedFetchCase(FetchCase):
             "use 'authenticated_fetch'.")
 
     def authenticated_fetch(
-            self, url, method=None, headers=None, body=None,
+            self, path, method=None, headers=None, body=None,
             auth_username=None, auth_password=None, auth_mode=None, **kwargs):
 
         headers = headers or {}
@@ -23,14 +23,14 @@ class AuthenticatedFetchCase(FetchCase):
         # TODO: change URL to query for query arguments instead...
 
         fetch_arguments = build_fetch_arguments(
-            url=url, headers=headers, body=body, auth_mode=auth_mode,
+            path=path, headers=headers, body=body, auth_mode=auth_mode,
             auth_username=auth_username, auth_password=auth_password)
 
         update_credentials = self.get_credentials()
         update_credentials(fetch_arguments)
 
         arguments = {
-            "url": fetch_arguments.url,
+            "path": fetch_arguments.path
         }
 
         if method:
@@ -47,5 +47,4 @@ class AuthenticatedFetchCase(FetchCase):
         if fetch_arguments.auth_username:
             arguments["auth_username"] = fetch_arguments.auth_username
 
-        arguments.update(kwargs)
-        self.fetch(**arguments)
+        return self.fetch(**arguments)
