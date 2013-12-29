@@ -10,6 +10,6 @@ setup(
     author_email='catchjosh@gmail.com',
     url="http://github.com/joshmarshall/testnado/",
     license="http://www.apache.org/licenses/LICENSE-2.0",
-    packages=["testnado"],
+    packages=["testnado", "testnado.credentials"],
     install_requires=["tornado", "selenium", "mock", "nose"]
 )
