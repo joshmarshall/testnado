@@ -44,7 +44,7 @@ Most usage is as simple as, inside your tests, subclassing from HandlerTestCase 
         def get_credentials(self):
             # return a credentials object that updates a
             # response object with the proper stuff
-            return HeaderCredentials(token=self._user.token)
+            return HeaderCredentials({"X-Auth-Token": self._user.token})
 
 
 `testnado.HandlerTestCase` is a simple facade in front of composing more complicated test case behavior, like:
@@ -52,10 +52,10 @@ Most usage is as simple as, inside your tests, subclassing from HandlerTestCase 
     from tornado.testing import AsyncHTTPTestCase
     from testnado import AuthenticatedFetchCase
 
-    class MyHandlerTestCase(AsyncHTTPTestCase, AuthenticatedFetchCase):
+    class MyHandlerTestCase(AuthenticatedFetchCase, AsyncHTTPTestCase):
         ...
 
-This is obviously most helpful as a shared base class for all your Handler test cases, so writing tests is simpler:
+Once you've defined all your authentication requirements, this is obviously most helpful as a shared base class for all your Handler test cases, so writing tests is simpler:
 
     from mytests.helpers import MyHandlerTestCase
 
@@ -73,7 +73,7 @@ This is obviously most helpful as a shared base class for all your Handler test 
 
 Credentials
 -----------
-Ultimately, `get_credentials()` should just return a callable. It will receive one argument of `fetch_arguments`, which is a named tuple. This should be updated in place. For instance:
+At it's core, `HandlerTestCase.get_credentials()` just returns a callable. That callable will receive one argument of `fetch_arguments`, which is a named tuple with various fetch() parameters. This should be updated in place. For instance:
 
     def get_credentials(self):
         def callback(fetch_arguments):
@@ -87,13 +87,13 @@ Of course, that's annoying, especially for more boilerplate-y use cases like sec
 
     from testnado.credentials import CookieCredentials
 
-    # in the test case...
+    class MyHandlerTestCase(HandlerTestCase):
 
-    def get_app(self):
-        return Application(..., cookie_secret="foobar")
+        def get_app(self):
+            return Application(..., cookie_secret="foobar")
 
-    def get_credentials(self):
-        return CookieCredentials("auth", "token", cookie_secret="foobar")
+        def get_credentials(self):
+            return CookieCredentials("auth", "token", cookie_secret="foobar")
 
 Much shorter. I'll probably add a BasicAuthCredentials, but c'mon, how lazy are we. :)
 
