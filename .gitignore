@@ -3,3 +3,5 @@
 *.swo
 *.venv
 ghostdriver.log
+MANIFEST
+dist
