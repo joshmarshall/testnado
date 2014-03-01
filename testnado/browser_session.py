@@ -1,3 +1,4 @@
+import Cookie
 from functools import wraps
 import os
 import Queue
@@ -6,9 +7,10 @@ import time
 import threading
 from tornado.ioloop import PeriodicCallback
 from tornado.httpserver import HTTPServer
+from testnado.credentials.helpers import build_fetch_arguments
 
 
-def wrap_browser_session(*drivers):
+def wrap_browser_session(discover_credentials=True, *drivers):
     # right now drivers is a "fake" option -- anything other than phantomjs
     # will raise an Exception.
     drivers = drivers or ["phantomjs"]
@@ -19,11 +21,17 @@ def wrap_browser_session(*drivers):
             port = test_case.get_http_port()
             ioloop = test_case.io_loop
             app = test_case.get_app()
+            credentials = None
+            if hasattr(test_case, "get_credentials") and discover_credentials:
+                credentials = test_case.get_credentials()
+
             http_server = HTTPServer(app, io_loop=ioloop)
             http_server.listen(port)
-            for driver in drivers:
-                session = BrowserSession(driver, ioloop=ioloop)
-                with session.start() as driver:
+            for driver_name in drivers:
+                session = BrowserSession(driver_name, ioloop=ioloop)
+                if credentials:
+                    session.use_credentials(credentials)
+                with session as driver:
                     wrapped_driver = _WrapDriver(
                         driver, host="localhost", port=port)
                     kwargs["driver"] = wrapped_driver
@@ -34,11 +42,13 @@ def wrap_browser_session(*drivers):
 
 class BrowserSession(object):
 
-    def __init__(self, driver_name, ioloop):
+    def __init__(self, driver_name, ioloop, timeout=5):
         self._driver = _DRIVERS[driver_name]()
         self._ioloop = ioloop
         self._out_queue = Queue.Queue()
         self._in_queue = Queue.Queue()
+        self._timeout = timeout
+
         keyword_arguments = {
             "in_queue": self._in_queue,
             "out_queue": self._out_queue
@@ -46,9 +56,32 @@ class BrowserSession(object):
         self._thread = threading.Thread(
             target=self._on_start, kwargs=keyword_arguments)
 
-    def start(self, timeout=5):
-        self._timeout = timeout
-        return self
+    def use_credentials(self, credentials):
+        fetch_arguments = build_fetch_arguments("/")
+        credentials(fetch_arguments)
+        # Selenium doesn't support arbitrary headers (afaik), so we only
+        # support cookies for now.
+        if "Cookie" in fetch_arguments.headers:
+            cookie = Cookie.SimpleCookie()
+            cookie.load(fetch_arguments.headers["Cookie"])
+            for morsel_name, morsel in cookie.items():
+                self._driver.add_cookie({
+                    "name": morsel_name,
+                    "value": morsel.value
+                })
+
+    def start(self):
+        self._driver.set_page_load_timeout(self._timeout)
+        self._thread.start()
+        return self._driver
+
+    def stop(self):
+        self._in_queue.put("stop")
+        self._thread.join()
+        self._driver.delete_all_cookies()
+        if not self._out_queue.empty():
+            message = self._out_queue.get()
+            raise IOLoopException("Error from IOLoop thread: %s" % (message))
 
     def _on_start(self, in_queue, out_queue):
         self._start_time = time.time()
@@ -60,7 +93,7 @@ class BrowserSession(object):
     def _on_cycle(self):
         if not self._in_queue.empty():
             message = self._in_queue.get()
-            self._stop()
+            self._on_stop()
             if message != "stop":
                 self._out_queue.put("unknown message %s" % (message))
 
@@ -68,22 +101,15 @@ class BrowserSession(object):
             self._ioloop.stop()
             self._out_queue.put("timeout")
 
-    def _stop(self):
+    def _on_stop(self):
         self._periodic_callback.stop()
         self._ioloop.stop()
 
     def __enter__(self):
-        self._driver.set_page_load_timeout(self._timeout)
-        self._thread.start()
-        return self._driver
+        return self.start()
 
     def __exit__(self, *args, **kwargs):
-        self._in_queue.put("stop")
-        self._thread.join()
-        self._driver.delete_all_cookies()
-        if not self._out_queue.empty():
-            message = self._out_queue.get()
-            raise IOLoopException("Error from IOLoop thread: %s" % (message))
+        self.stop()
 
 
 class IOLoopException(Exception):
