@@ -107,7 +107,13 @@ NOTE: Currently, we reuse a browser session for the entire life of nosetests. Th
 
     class SessionTestCase(HandlerTestCase):
 
-        @wrap_browser_session()
+        def get_app(self):
+            # same as normal handler tests...
+
+        def get_credentials(self):
+            # only supports cookie credentials right now...
+
+        @wrap_browser_session(discover_credentials=False)
         def test_index(self, driver):
             driver.get("/")
             driver.find_element_by_id("email").keys("foo@bar.com")
@@ -118,11 +124,12 @@ NOTE: Currently, we reuse a browser session for the entire life of nosetests. Th
 
         @wrap_browser_session()
         def test_dashboard(self, driver):
-            # uses get_credentials() from AuthenticatedFetchCase
-            driver.authenticated_get("/dashboard")
+            # uses get_credentials() if available...
+            driver.get("/dashboard")
             self.assertEqual(
                 "Foo Bar",
                 driver.find_element_by_id("name").text())
+
 
 To Do
 -----
