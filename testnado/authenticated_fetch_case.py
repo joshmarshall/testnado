@@ -4,11 +4,6 @@ from testnado.fetch_case import FetchCase
 
 class AuthenticatedFetchCase(FetchCase):
 
-    def get_credentials(self):
-        raise NotImplementedError(
-            "Method 'get_credentials' must be implemented in order to "
-            "use 'authenticated_fetch'.")
-
     def authenticated_fetch(
             self, path, method=None, headers=None, body=None,
             auth_username=None, auth_password=None, auth_mode=None, **kwargs):
@@ -25,6 +20,11 @@ class AuthenticatedFetchCase(FetchCase):
         fetch_arguments = build_fetch_arguments(
             path=path, headers=headers, body=body, auth_mode=auth_mode,
             auth_username=auth_username, auth_password=auth_password)
+
+        if not hasattr(self, "get_credentials"):
+            raise NotImplementedError(
+                "Method 'get_credentials' must be implemented in order to "
+                "use 'authenticated_fetch'.")
 
         update_credentials = self.get_credentials()
         update_credentials(fetch_arguments)

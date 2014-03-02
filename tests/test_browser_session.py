@@ -1,12 +1,17 @@
 import random
+import time
+import unittest
+
+from tornado.ioloop import IOLoop
+from tornado.httpserver import HTTPServer
+from tornado.web import RequestHandler, Application, asynchronous
+
+from tests.helpers import TestCaseTestCase
+
 from testnado.browser_session import BrowserSession, IOLoopException
 from testnado.browser_session import wrap_browser_session
 from testnado.credentials.cookie_credentials import CookieCredentials
-import time
-from tornado.ioloop import IOLoop
-from tornado.web import RequestHandler, Application, asynchronous
-from tornado.httpserver import HTTPServer
-import unittest
+from testnado.handler_test_case import HandlerTestCase
 
 
 _PORTS = range(18000, 18100)
@@ -79,27 +84,6 @@ class TestBrowserSession(unittest.TestCase):
         self.assertTrue(
             run_time < 1, "IOLoop timeout took too long (%s)" % (run_time))
 
-    def test_browser_session_decorator(self):
-        ioloop = IOLoop()
-
-        class DummyTest(object):
-
-            io_loop = ioloop
-
-            def get_app(test_case):
-                return Application([("/", IndexHandler)])
-
-            def get_http_port(test_case):
-                return pop_port()
-
-            @wrap_browser_session()
-            def wrapped(test_case, driver):
-                driver.get("/")
-                self.assertEqual("Foo", driver.title)
-
-        case = DummyTest()
-        case.wrapped()
-
     def test_browser_session_authenticated(self):
         self._server.listen(self._port)
         session = BrowserSession("phantomjs", ioloop=self._ioloop)
@@ -115,13 +99,26 @@ class TestBrowserSession(unittest.TestCase):
             driver.get("http://localhost:{}/auth".format(self._port))
             self.assertEqual("Allowed", driver.title)
 
-    def test_browser_session_decorator_with_credentials(self):
-        ioloop = IOLoop()
-        port = pop_port()
 
-        class DummyTest(object):
+class TestBrowserSessionWithHandlerTestCase(TestCaseTestCase):
 
-            io_loop = ioloop
+    def test_browser_session_decorator(self):
+
+        class DummyTest(HandlerTestCase):
+
+            def get_app(test_case):
+                return Application([("/", IndexHandler)])
+
+            @wrap_browser_session()
+            def test_wrapped(test_case, driver):
+                driver.get("/")
+                self.assertEqual("Foo", driver.title)
+
+        self.execute_case(DummyTest)
+
+    def test_wrap_browser_session_without_credentials(self):
+
+        class DummyTest(HandlerTestCase):
 
             def get_app(test_case):
                 return Application([
@@ -129,23 +126,32 @@ class TestBrowserSession(unittest.TestCase):
                     ("/auth", AuthHandler)
                 ], cookie_secret="foobar")
 
-            def get_http_port(test_case):
-                return port
-
             def get_credentials(test_case):
                 return CookieCredentials("token", "FOOBAR", "foobar")
 
             @wrap_browser_session()
-            def wrapped_auth(test_case, driver):
+            def test_wrapped_auth(test_case, driver):
                 driver.get("/auth")
                 self.assertEqual("Allowed", driver.title)
 
+        self.execute_case(DummyTest)
+
+    def test_wrap_browser_session_with_credentials(self):
+
+        class DummyTest(HandlerTestCase):
+
+            def get_app(test_case):
+                return Application([
+                    ("/", IndexHandler),
+                    ("/auth", AuthHandler)
+                ], cookie_secret="foobar")
+
+            def get_credentials(test_case):
+                return CookieCredentials("token", "FOOBAR", "foobar")
+
             @wrap_browser_session(discover_credentials=False)
-            def wrapped_noauth(test_case, driver):
+            def test_wrapped_noauth(test_case, driver):
                 driver.get("/auth")
                 self.assertEqual("Forbidden", driver.title)
 
-        case = DummyTest()
-        case.wrapped_auth()
-        port = pop_port()
-        case.wrapped_noauth()
+        self.execute_case(DummyTest)

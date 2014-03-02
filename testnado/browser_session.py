@@ -6,7 +6,6 @@ from selenium import webdriver
 import time
 import threading
 from tornado.ioloop import PeriodicCallback
-from tornado.httpserver import HTTPServer
 from testnado.credentials.helpers import build_fetch_arguments
 
 
@@ -20,13 +19,10 @@ def wrap_browser_session(discover_credentials=True, *drivers):
         def test_runner(test_case, *args, **kwargs):
             port = test_case.get_http_port()
             ioloop = test_case.io_loop
-            app = test_case.get_app()
             credentials = None
             if hasattr(test_case, "get_credentials") and discover_credentials:
                 credentials = test_case.get_credentials()
 
-            http_server = HTTPServer(app, io_loop=ioloop)
-            http_server.listen(port)
             for driver_name in drivers:
                 session = BrowserSession(driver_name, ioloop=ioloop)
                 if credentials:
