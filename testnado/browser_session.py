@@ -25,12 +25,13 @@ def wrap_browser_session(discover_credentials=True, *drivers):
 
             for driver_name in drivers:
                 session = BrowserSession(driver_name, ioloop=ioloop)
-                if credentials:
-                    session.use_credentials(credentials)
                 with session as driver:
                     wrapped_driver = _WrapDriver(
                         driver, host="localhost", port=port)
                     kwargs["driver"] = wrapped_driver
+                    if credentials:
+                        wrapped_driver.get("/")
+                        wrapped_driver.use_credentials(credentials)
                     test_method(test_case, *args, **kwargs)
         return test_runner
     return test_wrapper
@@ -51,20 +52,6 @@ class BrowserSession(object):
         }
         self._thread = threading.Thread(
             target=self._on_start, kwargs=keyword_arguments)
-
-    def use_credentials(self, credentials):
-        fetch_arguments = build_fetch_arguments("/")
-        credentials(fetch_arguments)
-        # Selenium doesn't support arbitrary headers (afaik), so we only
-        # support cookies for now.
-        if "Cookie" in fetch_arguments.headers:
-            cookie = Cookie.SimpleCookie()
-            cookie.load(fetch_arguments.headers["Cookie"])
-            for morsel_name, morsel in cookie.items():
-                self._driver.add_cookie({
-                    "name": morsel_name,
-                    "value": morsel.value
-                })
 
     def start(self):
         self._driver.set_page_load_timeout(self._timeout)
@@ -153,6 +140,20 @@ class _WrapDriver(object):
     def get(self, path):
         full_url = "http://%s:%s%s" % (self._host, self._port, path)
         self._driver.get(full_url)
+
+    def use_credentials(self, credentials):
+        fetch_arguments = build_fetch_arguments("/")
+        credentials(fetch_arguments)
+        # Selenium doesn't support arbitrary headers (afaik), so we only
+        # support cookies for now.
+        if "Cookie" in fetch_arguments.headers:
+            cookie = Cookie.SimpleCookie()
+            cookie.load(fetch_arguments.headers["Cookie"])
+            for morsel_name, morsel in cookie.items():
+                self._driver.add_cookie({
+                    "name": morsel_name,
+                    "value": morsel.value
+                })
 
     def __getattr__(self, attribute):
         return getattr(self._driver, attribute)

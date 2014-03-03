@@ -84,21 +84,6 @@ class TestBrowserSession(unittest.TestCase):
         self.assertTrue(
             run_time < 1, "IOLoop timeout took too long (%s)" % (run_time))
 
-    def test_browser_session_authenticated(self):
-        self._server.listen(self._port)
-        session = BrowserSession("phantomjs", ioloop=self._ioloop)
-
-        with session as driver:
-            driver.get("http://localhost:{}/auth".format(self._port))
-            self.assertEqual("Forbidden", driver.title)
-
-        session = BrowserSession("phantomjs", ioloop=self._ioloop)
-        credentials = CookieCredentials("token", "FOOBAR", "foobar")
-        session.use_credentials(credentials)
-        with session as driver:
-            driver.get("http://localhost:{}/auth".format(self._port))
-            self.assertEqual("Allowed", driver.title)
-
 
 class TestBrowserSessionWithHandlerTestCase(TestCaseTestCase):
 
