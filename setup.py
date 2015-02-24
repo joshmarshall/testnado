@@ -1,9 +1,10 @@
 #!/usr/bin/env python
 
+import os
 from setuptools import setup, find_packages
 
 
-with open("VERSION") as version_fp:
+with open(os.path.join(os.path.dirname(__file__), "VERSION")) as version_fp:
     VERSION = version_fp.read().strip()
 
 setup(
@@ -15,6 +16,5 @@ setup(
     url="http://github.com/joshmarshall/testnado/",
     license="http://www.apache.org/licenses/LICENSE-2.0",
     packages=find_packages(exclude=["tests", "dist"]),
-    package_data={"testnado": ["VERSION"]},
     install_requires=["tornado", "selenium", "mock"]
 )
