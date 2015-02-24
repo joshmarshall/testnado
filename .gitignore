@@ -5,3 +5,4 @@
 ghostdriver.log
 MANIFEST
 dist
+*.egg-info
