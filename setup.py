@@ -1,10 +1,9 @@
 #!/usr/bin/env python
 
-import os
 from setuptools import setup, find_packages
 
 
-with open(os.path.join(os.path.dirname(__file__), "VERSION")) as version_fp:
+with open("VERSION") as version_fp:
     VERSION = version_fp.read().strip()
 
 setup(
