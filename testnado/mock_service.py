@@ -50,10 +50,9 @@ class MockService(object):
         for handler in self.routes.values():
             if handler.route.match(path):
                 try:
-                    handler.assert_requested(method, path, headers)
+                    return handler.assert_requested(method, path, headers)
                 except AssertionError:
                     continue
-                return
         raise AssertionError("No request matched: {} {}".format(method, path))
 
 
@@ -75,8 +74,7 @@ class MockServiceMethods():
         return self._handle_method("INFO", args, kwargs)
 
     def _handle_method(self, method, args, kwargs):
-        request = _Request(method, self.request.path, self.request.headers)
-        self.requests.append(request)
+        self.requests.append(self.request)
         if method not in self.method_handlers:
             raise HTTPError(405, "Method '{}' has no handler.".format(method))
         return self.method_handlers[method](self, *args, **kwargs)
@@ -97,7 +95,7 @@ class MockServiceMethods():
                 continue
 
             if request.method == method and request.path == path:
-                return
+                return request
         raise AssertionError("No request matched: {}".format(method))
 
 

@@ -56,9 +56,10 @@ class TestMockService(AsyncTestCase):
         # it functions as a simple mocking tool but still makes people
         # actually put content in for real client testing
         response = yield self.fetch(
-            self.service.url("/foobar"), method="OPTIONS")
+            self.service.url("/foobar?query=true"), method="OPTIONS")
         self.assertEqual(501, response.code)
-        self.service.assert_requested("OPTIONS", "/foobar")
+        request = self.service.assert_requested("OPTIONS", "/foobar")
+        self.assertTrue("query" in request.arguments)
 
     @gen_test
     def test_mock_service_assert_requested_with_headers(self):
