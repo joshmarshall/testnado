@@ -20,3 +20,12 @@ class TestCookieCredentials(unittest.TestCase):
         cookie_value = cookie["auth"].value
         expected_value = decode_signed_value("foobar", "auth", cookie_value)
         self.assertEqual("token", expected_value)
+
+    def test_cookie_credentials_plaintext(self):
+        fetch_arguments = build_fetch_arguments("/foobar")
+        credentials = CookieCredentials("auth", "token")
+        credentials(fetch_arguments)
+        cookie = Cookie.SimpleCookie()
+        cookie.load(fetch_arguments.headers["Cookie"])
+        self.assertTrue("auth" in cookie)
+        self.assertEqual("token", cookie["auth"].value)
