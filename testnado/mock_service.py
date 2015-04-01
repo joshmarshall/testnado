@@ -67,6 +67,9 @@ class MockServiceMethods():
     def post(self, *args, **kwargs):
         return self._handle_method("POST", args, kwargs)
 
+    def delete(self, *args, **kwargs):
+        return self._handle_method("DELETE", args, kwargs)
+
     def options(self, *args, **kwargs):
         return self._handle_method("OPTIONS", args, kwargs)
 
