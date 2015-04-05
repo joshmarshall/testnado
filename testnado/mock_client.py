@@ -19,10 +19,11 @@ class MockClient(object):
         self.client = AsyncHTTPClient(self.ioloop)
         self.original_fetch = self.client.fetch
 
-    def mock_url(self, url):
+    def mock_url(self, url, method="GET"):
         mock_response = MockResponse(url)
         base_url = url.split("?")[0]
-        self.mocked_urls.setdefault(base_url, []).append(mock_response)
+        self.mocked_urls.setdefault(base_url, []).append(
+            (method, mock_response))
         return mock_response
 
     @contextlib.contextmanager
@@ -46,11 +47,21 @@ class MockClient(object):
             raise MissingMockResponse(
                 "URL requested too many times: {}".format(base_url))
 
-        response = responses.pop(0)
+        expected_method, response = responses.pop(0)
+        request_method = kwargs.get("method", "GET")
+
+        if expected_method != request_method:
+            responses.insert(0, (expected_method, response))
+            response = MockResponse(url)
+            response.body = \
+                "Method mismatch ({}) for mocked URL: {} {}".format(
+                    request_method, expected_method, base_url)
+            response.code = 405
+
         if response.code > 399 and kwargs.get("raise_error", True):
             raise HTTPError(
-                code=response.code, message="Error requesting resource",
-                response=response)
+                code=response.code, message="Mock error: ({}) {}".format(
+                    response.code, response.body), response=response)
         raise gen.Return(response)
 
 
