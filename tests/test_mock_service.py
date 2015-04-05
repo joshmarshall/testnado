@@ -62,6 +62,16 @@ class TestMockService(AsyncTestCase):
         self.assertTrue("query" in request.arguments)
 
     @gen_test
+    def test_mock_service_assert_not_requested(self):
+        self.service.listen()
+        self.service.assert_not_requested("GET", "/foobar")
+
+        yield self.fetch(self.service.url("/foobar"))
+
+        with self.assertRaises(AssertionError):
+            self.service.assert_not_requested("GET", "/foobar")
+
+    @gen_test
     def test_mock_service_assert_requested_with_headers(self):
         self.service.listen()
         response = yield self.fetch(

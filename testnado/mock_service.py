@@ -55,6 +55,15 @@ class MockService(object):
                     continue
         raise AssertionError("No request matched: {} {}".format(method, path))
 
+    def assert_not_requested(self, method, path, headers=None):
+        try:
+            self.assert_requested(method=method, path=path, headers=headers)
+        except AssertionError:
+            pass
+        else:
+            raise AssertionError(
+                "Request was made to: {} {}".format(method, path))
+
 
 class MockServiceMethods():
 
