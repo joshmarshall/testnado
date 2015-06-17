@@ -70,6 +70,9 @@ class MockServiceMethods():
     def get(self, *args, **kwargs):
         return self._handle_method("GET", args, kwargs)
 
+    def head(self, *args, **kwargs):
+        return self._handle_method("HEAD", args, kwargs)
+
     def put(self, *args, **kwargs):
         return self._handle_method("PUT", args, kwargs)
 

@@ -88,3 +88,12 @@ class TestMockService(AsyncTestCase):
         response = yield self.fetch(self.service.url("/"), method="DELETE")
         self.assertEqual(200, response.code)
         self.service.assert_requested("DELETE", "/")
+
+    @gen_test
+    def test_mock_service_assert_requested_supports_head(self):
+        self.service.add_method("HEAD", "/", lambda x: x.finish({"x": True}))
+        self.service.listen()
+
+        response = yield self.fetch(self.service.url("/"), method="HEAD")
+        self.assertEqual(200, response.code)
+        self.service.assert_requested("HEAD", "/")

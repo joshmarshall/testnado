@@ -38,6 +38,21 @@ class TestMockClient(AsyncTestCase):
         self.assertEqual("foobar", fetched.headers["x-test"])
 
     @gen_test
+    def test_patch_respects_method(self):
+        self.mock_client.mock_url("http://foo.com/bar", method="POST")
+
+        with self.mock_client.patch():
+            client = AsyncHTTPClient()
+            get_response = yield client.fetch(
+                "http://foo.com/bar", method="GET", raise_error=False)
+
+            post_response = yield client.fetch(
+                "http://foo.com/bar", method="POST")
+
+        self.assertEqual(405, get_response.code)
+        self.assertEqual(200, post_response.code)
+
+    @gen_test
     def test_patches_raises_error(self):
         response = self.mock_client.mock_url("http://foo.com/bar")
         response.code = 500
