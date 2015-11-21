@@ -1,3 +1,4 @@
+import atexit
 import Cookie
 from functools import wraps
 import os
@@ -52,6 +53,7 @@ class BrowserSession(object):
         }
         self._thread = threading.Thread(
             target=self._on_start, kwargs=keyword_arguments)
+        self._thread.daemon = True
 
     def start(self):
         self._driver.set_page_load_timeout(self._timeout)
@@ -128,6 +130,13 @@ _DRIVER_CACHE = {}
 _DRIVERS = {
     "phantomjs": _build_phantomjs
 }
+
+
+def shutdown():
+    for driver in _DRIVER_CACHE.values():
+        driver.quit()
+
+atexit.register(shutdown)
 
 
 class _WrapDriver(object):
