@@ -1,8 +1,18 @@
 import collections
 import re
-import urlparse
+
+try:
+    import urlparse
+except ImportError:
+    import urllib.parse as urlparse
 
 from tornado.web import Application, HTTPError, RequestHandler
+
+
+try:
+    basestring
+except NameError:
+    basestring = str
 
 
 class MockService(object):
@@ -116,7 +126,7 @@ class MockServiceMethods():
 
 def build_handler(handler_route):
 
-    if type(handler_route) in (str, unicode):
+    if isinstance(handler_route, basestring):
         handler_route = re.compile(handler_route)
 
     class Handler(MockServiceMethods, RequestHandler):

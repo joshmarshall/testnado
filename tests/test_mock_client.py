@@ -94,7 +94,7 @@ class TestMockClient(AsyncTestCase):
             response = yield client.fetch("http://localhost:{}/".format(port))
 
         self.assertEqual(200, response.code)
-        self.assertEqual("REAL RESPONSE", response.body)
+        self.assertEqual("REAL RESPONSE", response.body.decode("utf-8"))
 
     @gen_test
     def test_patch_ignores_query_parameters(self):

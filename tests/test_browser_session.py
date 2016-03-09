@@ -1,9 +1,9 @@
-import random
 import time
 import unittest
 
 from tornado.ioloop import IOLoop
 from tornado.httpserver import HTTPServer
+from tornado.testing import bind_unused_port
 from tornado.web import RequestHandler, Application, asynchronous
 
 from tests.helpers import TestCaseTestCase
@@ -12,15 +12,6 @@ from testnado.browser_session import BrowserSession, IOLoopException
 from testnado.browser_session import wrap_browser_session
 from testnado.credentials.cookie_credentials import CookieCredentials
 from testnado.handler_test_case import HandlerTestCase
-
-
-_PORTS = range(18000, 18100)
-
-
-def pop_port():
-    port = random.choice(_PORTS)
-    _PORTS.remove(port)
-    return port
 
 
 class IndexHandler(RequestHandler):
@@ -46,7 +37,8 @@ class AuthHandler(RequestHandler):
 
     def get(self, *args, **kwargs):
         title = "Forbidden"
-        if self.get_secure_cookie("token") == "FOOBAR":
+        cookie = self.get_secure_cookie("token")
+        if cookie and cookie.decode("utf-8") == "FOOBAR":
             title = "Allowed"
         self.finish(
             "<html>head><title>{}</title></head></html>".format(title))
@@ -63,7 +55,7 @@ class TestBrowserSession(unittest.TestCase):
             ("/auth", AuthHandler)
         ], ioloop=self._ioloop, cookie_secret="foobar")
         self._server = HTTPServer(self._app, io_loop=self._ioloop)
-        self._port = pop_port()
+        _, self._port = bind_unused_port()
 
     def test_browser_session(self):
         self._server.listen(self._port)

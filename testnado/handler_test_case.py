@@ -1,6 +1,10 @@
 from testnado import AuthenticatedFetchCase
 from tornado.testing import AsyncHTTPTestCase
-import urlparse
+
+try:
+    import urlparse
+except ImportError:
+    import urllib.parse as urlparse
 
 
 class HandlerTestCase(AuthenticatedFetchCase, AsyncHTTPTestCase):

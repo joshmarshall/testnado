@@ -24,6 +24,8 @@ class TestServiceTestCase(TestCaseTestCase):
                 client = AsyncHTTPClient(io_loop=self.io_loop)
                 response = yield client.fetch(service.url("/endpoint"))
                 self.assertEqual(200, response.code)
-                self.assertEqual({"foo": "bar"}, json.loads(response.body))
+                self.assertEqual(
+                    {"foo": "bar"},
+                    json.loads(response.body.decode("utf-8")))
 
         self.execute_case(BasicTest)

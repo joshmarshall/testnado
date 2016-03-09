@@ -1,8 +1,18 @@
 import atexit
-import Cookie
+
+try:
+    from Cookie import SimpleCookie
+except ImportError:
+    from http.cookies import SimpleCookie
+
 from functools import wraps
 import os
-import Queue
+
+try:
+    from Queue import Queue
+except ImportError:
+    from queue import Queue
+
 from selenium import webdriver
 import time
 import threading
@@ -43,8 +53,8 @@ class BrowserSession(object):
     def __init__(self, driver_name, ioloop, timeout=5):
         self._driver = _DRIVERS[driver_name]()
         self._ioloop = ioloop
-        self._out_queue = Queue.Queue()
-        self._in_queue = Queue.Queue()
+        self._out_queue = Queue()
+        self._in_queue = Queue()
         self._timeout = timeout
 
         keyword_arguments = {
@@ -156,7 +166,7 @@ class _WrapDriver(object):
         # Selenium doesn't support arbitrary headers (afaik), so we only
         # support cookies for now.
         if "Cookie" in fetch_arguments.headers:
-            cookie = Cookie.SimpleCookie()
+            cookie = SimpleCookie()
             cookie.load(fetch_arguments.headers["Cookie"])
             for morsel_name, morsel in cookie.items():
                 self._driver.add_cookie({
