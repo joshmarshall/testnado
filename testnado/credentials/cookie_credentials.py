@@ -1,4 +1,8 @@
-import Cookie
+try:
+    from Cookie import SimpleCookie
+except ImportError:
+    from http.cookies import SimpleCookie
+
 from tornado.web import create_signed_value
 
 
@@ -8,11 +12,11 @@ class CookieCredentials(object):
         # need to update this so it takes values like domain, expires, etc
         # for people who test more deeply.
 
-        self._cookie = Cookie.SimpleCookie()
+        self._cookie = SimpleCookie()
         self._cookie_name = cookie_name
         if cookie_secret:
             cookie_value = create_signed_value(
-                cookie_secret, cookie_name, cookie_value)
+                cookie_secret, cookie_name, cookie_value).decode("utf-8")
         self._cookie[cookie_name] = cookie_value
 
     def __call__(self, fetch_arguments):

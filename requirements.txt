@@ -2,4 +2,3 @@ mock
 nose
 selenium
 tornado
-wsgiref
