@@ -129,7 +129,7 @@ not-working responses). So in general, you'll be:
 
 ```python
 from tornado.testing import AsyncTestCase, gen_test
-from tornadomock.setup_case_helpers import ServiceCaseHelpers
+from testnado.service_case_helpers import ServiceCaseHelpers
 
 from mylib.api_client import APIClient
 
@@ -148,7 +148,7 @@ class TestAPIClient(ServiceCaseHelpers, AsyncTestCase):
         account = yield client.authenticate(my_app_token)
         # test the JSON result is used
         self.assertEqual("joeuser", account.username)
-        self.service.assert_requested(
+        service.assert_requested(
             "GET", "/v1/accounts", headers={"X-Token": my_app_token})
 ```
 
