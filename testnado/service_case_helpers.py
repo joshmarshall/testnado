@@ -11,9 +11,11 @@ class ServiceCaseHelpers(object):
             self._mock_services = []
         return self._mock_services
 
-    def add_service(self):
-        _, port = bind_unused_port()
-        service = MockService(self.io_loop, port)
+    def add_service(self, service=None):
+        if not service:
+            s, port = bind_unused_port()
+            s.close()
+            service = MockService(self.io_loop, port)
         self.mock_services.append(service)
         return service
 
