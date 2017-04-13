@@ -62,6 +62,17 @@ class TestMockService(AsyncTestCase):
         self.assertTrue("query" in request.arguments)
 
     @gen_test
+    def test_mock_service_assert_requested_ignores_headers_by_default(self):
+        self.service.listen()
+        response = yield self.fetch(
+            self.service.url("/foobar?query=true"), method="GET",
+            headers={"X-Foo": "Bar"})
+        self.assertEqual(501, response.code)
+        request = self.service.assert_requested("GET", "/foobar")
+        self.assertTrue("query" in request.arguments)
+        self.assertEqual("Bar", request.headers["X-Foo"])
+
+    @gen_test
     def test_mock_service_assert_not_requested(self):
         self.service.listen()
         self.service.assert_not_requested("GET", "/foobar")
