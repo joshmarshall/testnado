@@ -31,7 +31,7 @@ class TestServiceTestCase(TestCaseTestCase):
 
         self.execute_case(BasicTest)
 
-    def test_service_case_helpers_add_service_allows_optional_argument(self):
+    def test_service_case_helpers_add_service_accepts_existing_service(self):
 
         def handle_get(handler):
             handler.finish({"foo": "bar"})
