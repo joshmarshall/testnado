@@ -18,7 +18,7 @@ class TestServiceTestCase(TestCaseTestCase):
         class BasicTest(ServiceCaseHelpers, AsyncTestCase):
 
             @gen_test
-            def test_add_route(self):
+            def test_add_method(self):
                 service = self.add_service()
                 service.add_method("GET", "/endpoint", handle_get)
                 self.start_services()
@@ -39,7 +39,7 @@ class TestServiceTestCase(TestCaseTestCase):
         class BasicTest(ServiceCaseHelpers, AsyncTestCase):
 
             @gen_test
-            def test_add_route(self):
+            def test_add_method(self):
                 s, port = bind_unused_port()
                 s.close()
                 service = MockService(self.io_loop, port)
