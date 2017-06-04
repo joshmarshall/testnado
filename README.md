@@ -141,7 +141,7 @@ class TestAPIClient(ServiceCaseHelpers, AsyncTestCase):
         responder = lambda handler: handler.finish({"user": "joeuser"})
 
         service = self.add_service()
-        service.add_route("POST", "/v1/accounts", responder)
+        service.add_method("POST", "/v1/accounts", responder)
         service.listen()
 
         client = APIClient(service.url("/v1"), self.io_loop)
