@@ -22,3 +22,7 @@ class ServiceCaseHelpers(object):
     def start_services(self):
         for service in self.mock_services:
             service.listen()
+
+    def stop_services(self):
+        for service in self.mock_services:
+            service.stop()

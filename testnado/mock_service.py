@@ -25,6 +25,7 @@ class MockService(object):
         self.base_url = "http://" + self.host
         self.routes = {}
         self._listening = False
+        self._service = None
 
     def url(self, path):
         return urlparse.urljoin(self.base_url, path)
@@ -45,8 +46,11 @@ class MockService(object):
             handler.add_method("INFO", _unimplemented)
 
         application = Application(self.routes.items())
-        application.listen(self.port, io_loop=self.ioloop)
+        self._service = application.listen(self.port, io_loop=self.ioloop)
         self._listening = True
+
+    def stop(self):
+        self._service.stop()
 
     def add_method(self, method, route, method_handler):
         # this only works with text (not regex) routes, but it's a helper

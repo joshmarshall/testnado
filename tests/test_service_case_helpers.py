@@ -54,3 +54,30 @@ class TestServiceTestCase(TestCaseTestCase):
                     json.loads(response.body.decode("utf-8")))
 
         self.execute_case(BasicTest)
+
+    def test_service_case_helpers_stop_services_stops_all_services(self):
+
+        def handle_get(handler):
+            handler.finish({"foo": "bar"})
+
+        class BasicTest(ServiceCaseHelpers, AsyncTestCase):
+
+            @gen_test
+            def test_stop_services(self):
+                service1 = self.add_service()
+                service2 = self.add_service()
+                service3 = self.add_service()
+                self.start_services()
+
+                self.stop_services()
+
+                client = AsyncHTTPClient(io_loop=self.io_loop)
+
+                self.assertEqual(
+                    599, (yield client.fetch(service1.url("/"), raise_error=False)).code)
+                self.assertEqual(
+                    599, (yield client.fetch(service2.url("/"), raise_error=False)).code)
+                self.assertEqual(
+                    599, (yield client.fetch(service3.url("/"), raise_error=False)).code)
+
+        self.execute_case(BasicTest)
