@@ -108,3 +108,11 @@ class TestMockService(AsyncTestCase):
         response = yield self.fetch(self.service.url("/"), method="HEAD")
         self.assertEqual(200, response.code)
         self.service.assert_requested("HEAD", "/")
+
+    @gen_test
+    def test_mock_service_assert_stop_stops_the_service(self):
+        self.service.listen()
+        self.service.stop()
+
+        response = yield self.fetch(self.service.url("/"), method="HEAD")
+        self.assertEqual(599, response.code)
