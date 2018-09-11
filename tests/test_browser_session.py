@@ -54,7 +54,7 @@ class TestBrowserSession(unittest.TestCase):
             ("/timeout", TimeoutHandler),
             ("/auth", AuthHandler)
         ], ioloop=self._ioloop, cookie_secret="foobar")
-        self._server = HTTPServer(self._app, io_loop=self._ioloop)
+        self._server = HTTPServer(self._app)
         _, self._port = bind_unused_port()
 
     def test_browser_session(self):

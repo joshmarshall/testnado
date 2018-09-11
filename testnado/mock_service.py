@@ -46,7 +46,7 @@ class MockService(object):
             handler.add_method("INFO", _unimplemented)
 
         application = Application(self.routes.items())
-        self._service = application.listen(self.port, io_loop=self.ioloop)
+        self._service = application.listen(self.port)
         self._listening = True
 
     def stop(self):

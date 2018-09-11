@@ -16,7 +16,8 @@ class MockClient(object):
     def __init__(self, ioloop):
         self.ioloop = ioloop
         self.mocked_urls = {}
-        self.client = AsyncHTTPClient(self.ioloop)
+        self.ioloop.make_current()
+        self.client = AsyncHTTPClient()
         self.original_fetch = self.client.fetch
 
     def mock_url(self, url, method="GET"):

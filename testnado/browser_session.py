@@ -16,7 +16,7 @@ except ImportError:
 from selenium import webdriver
 import time
 import threading
-from tornado.ioloop import PeriodicCallback
+from tornado.ioloop import PeriodicCallback, IOLoop
 from testnado.credentials.helpers import build_fetch_arguments
 
 
@@ -80,8 +80,9 @@ class BrowserSession(object):
 
     def _on_start(self, in_queue, out_queue):
         self._start_time = time.time()
-        self._periodic_callback = PeriodicCallback(
-            self._on_cycle, 100, io_loop=self._ioloop)
+        self._ioloop = IOLoop()
+        self._ioloop.make_current()
+        self._periodic_callback = PeriodicCallback(self._on_cycle, 100)
         self._periodic_callback.start()
         self._ioloop.start()
 
@@ -145,6 +146,7 @@ _DRIVERS = {
 def shutdown():
     for driver in _DRIVER_CACHE.values():
         driver.quit()
+
 
 atexit.register(shutdown)
 

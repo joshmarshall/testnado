@@ -1,4 +1,4 @@
 mock
 nose
 selenium
-tornado
+tornado>=5.0

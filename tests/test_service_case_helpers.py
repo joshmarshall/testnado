@@ -22,7 +22,7 @@ class TestServiceTestCase(TestCaseTestCase):
                 service = self.add_service()
                 service.add_method("GET", "/endpoint", handle_get)
                 self.start_services()
-                client = AsyncHTTPClient(io_loop=self.io_loop)
+                client = AsyncHTTPClient()
                 response = yield client.fetch(service.url("/endpoint"))
                 self.assertEqual(200, response.code)
                 self.assertEqual(
@@ -46,7 +46,7 @@ class TestServiceTestCase(TestCaseTestCase):
                 service.add_method("GET", "/endpoint", handle_get)
                 self.add_service(service)
                 self.start_services()
-                client = AsyncHTTPClient(io_loop=self.io_loop)
+                client = AsyncHTTPClient()
                 response = yield client.fetch(service.url("/endpoint"))
                 self.assertEqual(200, response.code)
                 self.assertEqual(
@@ -71,7 +71,7 @@ class TestServiceTestCase(TestCaseTestCase):
 
                 self.stop_services()
 
-                client = AsyncHTTPClient(io_loop=self.io_loop)
+                client = AsyncHTTPClient()
 
                 self.assertEqual(
                     599, (yield client.fetch(service1.url("/"), raise_error=False)).code)
