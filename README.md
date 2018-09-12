@@ -157,44 +157,10 @@ test if you don't want the add_service() helpers. There are a few other
 smaller things this does, but principally that's it. Read the source and
 tests for more insight.
 
-## Browser Testing
-The automated browser testing requires PhantomJS (eventually other Selenium
-drivers) and bashes Selenium tests with the Golden Hammer of with contexts. It
-spins up a Tornado session in a thread, and gives a wrapped Selenium driver
-with helpers so you don't have to pass in full hosts / ports / credentials
-every test. This is mostly intended for full workflows, testing Javascript
-in-situ with Python, etc.
-
-NOTE: Currently, we reuse a browser session for the entire life of nosetests.
-This is to keep tests from being annoyingly slow, but there are obvious
-pollution issues like history, localStorage, etc. We do clear all cookies after
-each with statement, though.
-
-```python
-from testnado import wrap_browser_session
-
-class SessionTestCase(HandlerTestCase):
-
-    def get_app(self):
-        # same as normal handler tests...
-
-    def get_credentials(self):
-        # only supports cookie credentials right now...
-
-    @wrap_browser_session(discover_credentials=False)
-    def test_index(self, driver):
-        driver.get("/")
-        driver.find_element_by_id("email").keys("foo@bar.com")
-        driver.find_element_by_id("password").keys("foobar")
-        driver.find_element_by_id("submit").click()
-        self.assertTrue(driver.current_url.endswith("/dashboard"))
-        # etc...
-
-    @wrap_browser_session()
-    def test_dashboard(self, driver):
-        # uses get_credentials() if available...
-        driver.get("/dashboard")
-        self.assertEqual(
-            "Foo Bar",
-            driver.find_element_by_id("name").text())
-```
+### Browser Testing (Removed) ###
+The browser testing via Selenium section has been removed for Tornado 5 support
+-- there were incompatibilities with the IOLoop and threading in the first
+place, but with the migration away from PhantomJS, the implementation was not
+necessary as part of testnado core. It may resurface as another library
+dependent on this one in the future, which is a cleaner design anyway (not all
+Tornado services should require a dev dependency of Selenium...)

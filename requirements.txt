@@ -1,4 +1,3 @@
 mock
 nose
-selenium
 tornado>=5.0

@@ -1,4 +1,3 @@
 from testnado.authenticated_fetch_case import AuthenticatedFetchCase
-from testnado.browser_session import wrap_browser_session
 from testnado.fetch_case import FetchCase
 from testnado.handler_test_case import HandlerTestCase
