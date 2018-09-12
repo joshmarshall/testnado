@@ -4,7 +4,10 @@
 # just can't change internal fetching parameters for dependent libraries.
 
 import contextlib
-import mock
+try:
+    import unittest.mock as mock
+except ImportError:
+    import mock
 
 from tornado import gen
 from tornado.httpclient import AsyncHTTPClient, HTTPError
