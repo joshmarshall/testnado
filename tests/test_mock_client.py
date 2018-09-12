@@ -1,16 +1,9 @@
-import socket
-
-from tornado.testing import AsyncTestCase, gen_test
+from tornado.testing import AsyncTestCase, gen_test, bind_unused_port
 from tornado.httpclient import AsyncHTTPClient, HTTPError
+from tornado.httpserver import HTTPServer
 from tornado.web import RequestHandler, Application
 
 from testnado.mock_client import MockClient, MissingMockResponse
-
-
-def get_unused_port():
-    s = socket.socket()
-    s.bind(("localhost", 0))
-    return s.getsockname()[1]
 
 
 class TestMockClient(AsyncTestCase):
@@ -94,9 +87,10 @@ class TestMockClient(AsyncTestCase):
             def get(self):
                 self.finish("REAL RESPONSE")
 
-        port = get_unused_port()
+        socket, port = bind_unused_port()
         app = Application([("/", Handler)])
-        app.listen(port)
+        server = HTTPServer(app)
+        server.add_sockets([socket])
         with self.mock_client.patch():
             client = AsyncHTTPClient()
             response = yield client.fetch("http://localhost:{}/".format(port))
