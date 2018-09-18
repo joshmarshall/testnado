@@ -1,11 +1,13 @@
 language: python
 python:
 - "2.7"
-- "3.3"
 - "3.4"
 - "3.5"
-install: pip install -r requirements.txt
-script: nosetests tests/
+- "3.6"
+install:
+  - pip install -r requirements.txt
+  - pip install tox
+script: tox -e $(echo py$TRAVIS_PYTHON_VERSION | tr -d .)
 deploy:
   provider: pypi
   user: joshmarshall

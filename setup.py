@@ -1,10 +1,17 @@
 #!/usr/bin/env python
 
+import sys
 from setuptools import setup, find_packages
 
 
 with open("VERSION") as version_fp:
     VERSION = version_fp.read().strip()
+
+
+INSTALL_REQUIRES = ["tornado>=4"]
+
+if sys.version_info[0] == 2:
+    INSTALL_REQUIRES.append("mock")
 
 setup(
     name="testnado",
@@ -15,5 +22,5 @@ setup(
     url="http://github.com/joshmarshall/testnado/",
     license="http://www.apache.org/licenses/LICENSE-2.0",
     packages=find_packages(exclude=["tests", "dist"]),
-    install_requires=["tornado", "selenium", "mock"]
+    install_requires=INSTALL_REQUIRES
 )

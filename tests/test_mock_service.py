@@ -24,7 +24,7 @@ class TestMockService(AsyncTestCase):
     @gen.coroutine
     def fetch(self, url, *args, **kwargs):
         kwargs.setdefault("raise_error", False)
-        client = AsyncHTTPClient(io_loop=self.io_loop)
+        client = AsyncHTTPClient()
         response = yield client.fetch(url, *args, **kwargs)
         raise gen.Return(response)
 
