@@ -1,18 +1,18 @@
 language: python
 python:
-- "2.7"
-- "3.4"
-- "3.5"
-- "3.6"
+- '2.7'
+- '3.4'
+- '3.5'
+- '3.6'
 install:
-  - pip install -r requirements.txt
-  - pip install tox
+- pip install -r requirements.txt
+- pip install tox
 script: tox -e $(echo py$TRAVIS_PYTHON_VERSION | tr -d .)
 deploy:
   provider: pypi
   user: joshmarshall
   password:
-    secure: lpKVI+F74h6KIVmjjlYCt3qtMwHAuTEMBW3m6MlO9rCm6polElpdL5qXCb96UUp2nIgh4BbKTvbF+D8K91NvdQL5Eh8d+n+3cSW5BwJa8DxJWjMMIJH8zOjj+w3TJYQuX1p86Nzlef4KYSGbZzfduX/5EKzqien1OpV75d8012E=
+    secure: BcVdtpGqpLeZTYlVHeutQRkTyO6pQawUCXy7J8bHb3RH/gwb0H0Gt66HmAhPKLDGFQmJTsqI+d3w9jEOGSyn1b9zvP40lZpY60jJFfRbVzm/M2Z15M+BUbDMwn48LuZHfA0tfloFfXqdYGKdGkdgIhdcwGat23Iv2ljyvroC7BM=
   on:
     tags: true
     repo: joshmarshall/testnado
