@@ -116,3 +116,15 @@ class TestMockService(AsyncTestCase):
 
         response = yield self.fetch(self.service.url("/"), method="HEAD")
         self.assertEqual(599, response.code)
+
+    @gen_test
+    def test_mock_service_listen_adds_socket_when_initialized_with_tuple_port(self):
+        sock, port = bind_unused_port()
+        service = MockService(self.io_loop, (sock, port))
+        service.add_method("GET", "/", lambda x: x.finish("it worked"))
+
+        service.listen()
+
+        response = yield self.fetch(service.url("/"))
+        self.assertEqual(200, response.code)
+        self.assertEqual("it worked", response.body.decode("utf-8"))
