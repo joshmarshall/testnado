@@ -6,6 +6,7 @@ try:
 except ImportError:
     import urllib.parse as urlparse
 
+from tornado.httpserver import HTTPServer
 from tornado.web import Application, HTTPError, RequestHandler
 
 
@@ -19,8 +20,12 @@ class MockService(object):
 
     def __init__(self, ioloop, port):
         self.ioloop = ioloop
-        self.port = port
-        self.host = "localhost:{0}".format(port)
+        if isinstance(port, tuple):
+            self.socket, self.port = port
+        else:
+            self.socket = None
+            self.port = port
+        self.host = "localhost:{0}".format(self.port)
         self.protocol = "http"
         self.base_url = "http://" + self.host
         self.routes = {}
@@ -46,7 +51,11 @@ class MockService(object):
             handler.add_method("INFO", _unimplemented)
 
         application = Application(self.routes.items())
-        self._service = application.listen(self.port)
+        if self.socket is not None:
+            self._service = HTTPServer(application)
+            self._service.add_socket(self.socket)
+        else:
+            self._service = application.listen(self.port)
         self._listening = True
 
     def stop(self):
