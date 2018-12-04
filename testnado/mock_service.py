@@ -23,7 +23,6 @@ class MockService(object):
         self.ioloop = ioloop
         if port is None:
             self.socket, self.port = bind_unused_port()
-            print(self.socket, self.port)
         elif isinstance(port, tuple):
             self.socket, self.port = port
         else:
