@@ -7,6 +7,7 @@ except ImportError:
     import urllib.parse as urlparse
 
 from tornado.httpserver import HTTPServer
+from tornado.testing import bind_unused_port
 from tornado.web import Application, HTTPError, RequestHandler
 
 
@@ -18,13 +19,15 @@ except NameError:
 
 class MockService(object):
 
-    def __init__(self, ioloop, port):
+    def __init__(self, ioloop, port=None):
         self.ioloop = ioloop
-        if isinstance(port, tuple):
+        if port is None:
+            self.socket, self.port = bind_unused_port()
+            print(self.socket, self.port)
+        elif isinstance(port, tuple):
             self.socket, self.port = port
         else:
-            self.socket = None
-            self.port = port
+            self.socket, self.port = None, port
         self.host = "localhost:{0}".format(self.port)
         self.protocol = "http"
         self.base_url = "http://" + self.host

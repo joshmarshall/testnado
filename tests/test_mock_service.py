@@ -118,6 +118,17 @@ class TestMockService(AsyncTestCase):
         self.assertEqual(599, response.code)
 
     @gen_test
+    def test_mock_service_listen_adds_socket_when_initialized_without_a_port(self):
+        service = MockService(self.io_loop)
+        service.add_method("GET", "/", lambda x: x.finish("pick a port for me"))
+
+        service.listen()
+
+        response = yield self.fetch(service.url("/"))
+        self.assertEqual(200, response.code)
+        self.assertEqual("pick a port for me", response.body.decode("utf-8"))
+
+    @gen_test
     def test_mock_service_listen_adds_socket_when_initialized_with_tuple_port(self):
         sock, port = bind_unused_port()
         service = MockService(self.io_loop, (sock, port))
@@ -125,6 +136,6 @@ class TestMockService(AsyncTestCase):
 
         service.listen()
 
-        response = yield self.fetch(service.url("/"))
+        response = yield self.fetch("http://localhost:{0}/".format(port))
         self.assertEqual(200, response.code)
         self.assertEqual("it worked", response.body.decode("utf-8"))
