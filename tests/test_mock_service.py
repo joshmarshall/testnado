@@ -11,13 +11,11 @@ class TestMockService(AsyncTestCase):
 
     def setUp(self):
         super(TestMockService, self).setUp()
-        _, self.port = bind_unused_port()
-        self.service = MockService(self.io_loop, self.port)
+        self.service = MockService(self.io_loop)
 
     def test_mock_service_url_helpers(self):
-        host = "localhost:{0}".format(self.port)
+        host = "localhost:{0}".format(self.service.port)
         self.assertEqual("http", self.service.protocol)
-        self.assertEqual(self.port, self.service.port)
         self.assertEqual("http://" + host, self.service.base_url)
         self.assertEqual("http://" + host + "/foo", self.service.url("/foo"))
 
@@ -118,15 +116,23 @@ class TestMockService(AsyncTestCase):
         self.assertEqual(599, response.code)
 
     @gen_test
-    def test_mock_service_listen_adds_socket_when_initialized_without_a_port(self):
-        service = MockService(self.io_loop)
-        service.add_method("GET", "/", lambda x: x.finish("pick a port for me"))
+    def test_mock_service_listen_listens_to_specified_port_number(self):
+        sock, port = bind_unused_port()
+        sock.close()
+        service = MockService(self.io_loop, port)
+        service.add_method("GET", "/", lambda x: x.finish("use this port"))
 
         service.listen()
 
         response = yield self.fetch(service.url("/"))
         self.assertEqual(200, response.code)
-        self.assertEqual("pick a port for me", response.body.decode("utf-8"))
+        self.assertEqual("use this port", response.body.decode("utf-8"))
+
+        host = "localhost:{0}".format(port)
+        self.assertEqual("http", service.protocol)
+        self.assertEqual(port, service.port)
+        self.assertEqual("http://" + host, service.base_url)
+        self.assertEqual("http://" + host + "/foo", service.url("/foo"))
 
     @gen_test
     def test_mock_service_listen_adds_socket_when_initialized_with_tuple_port(self):
@@ -139,3 +145,9 @@ class TestMockService(AsyncTestCase):
         response = yield self.fetch("http://localhost:{0}/".format(port))
         self.assertEqual(200, response.code)
         self.assertEqual("it worked", response.body.decode("utf-8"))
+
+        host = "localhost:{0}".format(port)
+        self.assertEqual("http", service.protocol)
+        self.assertEqual(port, service.port)
+        self.assertEqual("http://" + host, service.base_url)
+        self.assertEqual("http://" + host + "/foo", service.url("/foo"))
