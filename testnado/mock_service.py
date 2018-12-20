@@ -120,6 +120,13 @@ class MockServiceMethods():
     @classmethod
     def add_method(cls, method, handler):
         cls.method_handlers[method.upper()] = handler
+        if method not in cls.SUPPORTED_METHODS:
+            cls.SUPPORTED_METHODS = cls.SUPPORTED_METHODS + (method,)
+
+            def _custom_method(h, *args, **kwargs):
+                return h._handle_method(method, args, kwargs)
+
+            setattr(cls, method.lower(), _custom_method)
 
     @classmethod
     def assert_requested(cls, method, path, headers):
