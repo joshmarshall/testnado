@@ -3,6 +3,9 @@
 
 import unittest
 
+from tornado import gen
+from tornado.httpclient import AsyncHTTPClient
+
 
 class TestCaseTestCase(unittest.TestCase):
 
@@ -55,3 +58,16 @@ class TestCaseTestCase(unittest.TestCase):
             use_method = method
 
         test_case(use_method).debug()
+
+
+class ServiceTestHelpers(object):
+
+    @gen.coroutine
+    def assert_closed(self, *args, **kwargs):
+        client = AsyncHTTPClient()
+        kwargs.setdefault("raise_error", False)
+        try:
+            response = yield client.fetch(*args, **kwargs)
+            self.assertEqual(599, response.code)
+        except ConnectionRefusedError:
+            pass

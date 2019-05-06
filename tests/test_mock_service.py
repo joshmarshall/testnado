@@ -4,10 +4,11 @@ from tornado import gen
 from tornado.httpclient import AsyncHTTPClient
 from tornado.testing import AsyncTestCase, gen_test, bind_unused_port
 
+from tests.helpers import ServiceTestHelpers
 from testnado.mock_service import MockService
 
 
-class TestMockService(AsyncTestCase):
+class TestMockService(AsyncTestCase, ServiceTestHelpers):
 
     def setUp(self):
         super(TestMockService, self).setUp()
@@ -124,8 +125,7 @@ class TestMockService(AsyncTestCase):
         self.service.listen()
         self.service.stop()
 
-        response = yield self.fetch(self.service.url("/"), method="HEAD")
-        self.assertEqual(599, response.code)
+        yield self.assert_closed(self.service.url("/"), method="HEAD")
 
     @gen_test
     def test_mock_service_listen_listens_to_specified_port_number(self):

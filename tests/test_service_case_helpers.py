@@ -1,9 +1,9 @@
 import json
 
 from tornado.httpclient import AsyncHTTPClient
-from tornado.testing import gen_test, AsyncTestCase, bind_unused_port
+from tornado.testing import gen_test, AsyncTestCase
 
-from tests.helpers import TestCaseTestCase
+from tests.helpers import TestCaseTestCase, ServiceTestHelpers
 from testnado.mock_service import MockService
 from testnado.service_case_helpers import ServiceCaseHelpers
 
@@ -58,7 +58,7 @@ class TestServiceTestCase(TestCaseTestCase):
         def handle_get(handler):
             handler.finish({"foo": "bar"})
 
-        class BasicTest(ServiceCaseHelpers, AsyncTestCase):
+        class BasicTest(ServiceCaseHelpers, AsyncTestCase, ServiceTestHelpers):
 
             @gen_test
             def test_stop_services(self):
@@ -68,14 +68,8 @@ class TestServiceTestCase(TestCaseTestCase):
                 self.start_services()
 
                 self.stop_services()
-
-                client = AsyncHTTPClient()
-
-                self.assertEqual(
-                    599, (yield client.fetch(service1.url("/"), raise_error=False)).code)
-                self.assertEqual(
-                    599, (yield client.fetch(service2.url("/"), raise_error=False)).code)
-                self.assertEqual(
-                    599, (yield client.fetch(service3.url("/"), raise_error=False)).code)
+                yield self.assert_closed(service1.url("/"))
+                yield self.assert_closed(service2.url("/"))
+                yield self.assert_closed(service3.url("/"))
 
         self.execute_case(BasicTest)
