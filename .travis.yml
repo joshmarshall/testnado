@@ -10,6 +10,7 @@ install:
 script: tox -e $(echo py$TRAVIS_PYTHON_VERSION | tr -d .)
 deploy:
   provider: pypi
+  skip_existing: true
   user: joshmarshall
   password:
     secure: BcVdtpGqpLeZTYlVHeutQRkTyO6pQawUCXy7J8bHb3RH/gwb0H0Gt66HmAhPKLDGFQmJTsqI+d3w9jEOGSyn1b9zvP40lZpY60jJFfRbVzm/M2Z15M+BUbDMwn48LuZHfA0tfloFfXqdYGKdGkdgIhdcwGat23Iv2ljyvroC7BM=
