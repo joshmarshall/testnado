@@ -108,6 +108,18 @@ class TestMockService(AsyncTestCase):
         self.service.assert_requested("HEAD", "/")
 
     @gen_test
+    def test_mock_service_assert_requested_supports_nontstandard_methods(self):
+        self.service.add_method("FOOBAR", "/", lambda x: x.finish({"x": True}))
+        self.service.listen()
+
+        response = yield self.fetch(
+            self.service.url("/"), method="FOOBAR",
+            allow_nonstandard_methods=True)
+
+        self.assertEqual(200, response.code)
+        self.service.assert_requested("FOOBAR", "/")
+
+    @gen_test
     def test_mock_service_assert_stop_stops_the_service(self):
         self.service.listen()
         self.service.stop()
