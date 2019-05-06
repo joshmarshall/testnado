@@ -40,9 +40,7 @@ class TestServiceTestCase(TestCaseTestCase):
 
             @gen_test
             def test_add_method(self):
-                s, port = bind_unused_port()
-                s.close()
-                service = MockService(self.io_loop, port)
+                service = MockService(self.io_loop)
                 service.add_method("GET", "/endpoint", handle_get)
                 self.add_service(service)
                 self.start_services()
