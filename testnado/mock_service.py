@@ -61,7 +61,8 @@ class MockService(object):
         self._listening = True
 
     def stop(self):
-        self._service.stop()
+        if self._service is not None:
+            self._service.stop()
 
     def add_method(self, method, route, method_handler):
         # this only works with text (not regex) routes, but it's a helper
