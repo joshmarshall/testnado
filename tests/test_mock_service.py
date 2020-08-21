@@ -41,12 +41,12 @@ class TestMockService(AsyncTestCase, ServiceTestHelpers):
         response = yield self.fetch(
             self.service.url("/"), method="POST", body="FOOBAR")
         self.assertEqual(200, response.code)
-        self.assertEqual("PATCHED", response.body.decode("utf-8"))
+        self.assertEqual("RESPONSE", response.body.decode("utf-8"))
 
         response = yield self.fetch(
             self.service.url("/"), method="PATCH", body="FOOBAR")
         self.assertEqual(200, response.code)
-        self.assertEqual("RESPONSE", response.body.decode("utf-8"))
+        self.assertEqual("PATCHED", response.body.decode("utf-8"))
 
         response = yield self.fetch(self.service.url("/"), method="OPTIONS")
         self.assertEqual(405, response.code)
