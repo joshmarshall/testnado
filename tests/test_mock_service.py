@@ -127,6 +127,11 @@ class TestMockService(AsyncTestCase, ServiceTestHelpers):
 
         yield self.assert_closed(self.service.url("/"), method="HEAD")
 
+    def test_mock_service_stop_does_nothing_when_it_has_not_been_started_yet(self):
+        self.service.stop()
+
+        self.assertTrue(True, "Stop should not raise")
+
     @gen_test
     def test_mock_service_listen_listens_to_specified_port_number(self):
         sock, port = bind_unused_port()
