@@ -102,6 +102,9 @@ class MockServiceMethods():
     def put(self, *args, **kwargs):
         return self._handle_method("PUT", args, kwargs)
 
+    def patch(self, *args, **kwargs):
+        return self._handle_method("PATCH", args, kwargs)
+
     def post(self, *args, **kwargs):
         return self._handle_method("POST", args, kwargs)
 
