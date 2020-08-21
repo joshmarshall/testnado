@@ -31,6 +31,7 @@ class TestMockService(AsyncTestCase, ServiceTestHelpers):
     def test_mock_service_add_method(self):
         self.service.add_method("GET", "/", lambda x: x.finish({"num": 5}))
         self.service.add_method("POST", "/", lambda x: x.finish("RESPONSE"))
+        self.service.add_method("PATCH", "/", lambda x: x.finish("RESPONSE"))
         self.service.listen()
 
         response = yield self.fetch(self.service.url("/"))
@@ -39,6 +40,11 @@ class TestMockService(AsyncTestCase, ServiceTestHelpers):
 
         response = yield self.fetch(
             self.service.url("/"), method="POST", body="FOOBAR")
+        self.assertEqual(200, response.code)
+        self.assertEqual("RESPONSE", response.body.decode("utf-8"))
+
+        response = yield self.fetch(
+            self.service.url("/"), method="PATCH", body="FOOBAR")
         self.assertEqual(200, response.code)
         self.assertEqual("RESPONSE", response.body.decode("utf-8"))
 
